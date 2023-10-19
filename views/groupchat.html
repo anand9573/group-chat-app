@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <link rel="stylesheet" href="../public/css/main.css">
+    <title>Group Chat App</title>
+</head>
+<body>
+    <h2 class="sticky-top text-center mb-0 bg-warning p-2">Chat Group App</h2>
+        <div class="position-fixed navbar navbar-expand-sm navbar-dark bg-dark" style="width: 100vw;">
+            <div class="container bg-dark">
+                <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-label="Expand-Navigation">
+                    <span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="nav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item nav-link"><a href="#/home" id="home">Home</a></li>
+                        <li class="nav-item nav-link disabled"><a href="#/home" class="text-white font-weight-bold" id="home">My Groups</a></li>
+                        <li class="nav-item nav-link"><a href="#" onclick="logout()" class="font-weight-bold" id="logout">Logout</a></li>
+                    </ul>
+                </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex mt-1">
+            <div class="align-self-start bg-dark p-1 rounded-4 mb-1" style="width: 30vw;margin-top:6vw;">
+                <ul id="groups" class="chats fw-bolder ml-0 p-1">
+                </ul>
+            </div>
+        <div id="msg" class="messages align-self-end border p-2 bg-dark rounded-4" style="width: 70vw;height: 99vh;margin:0 0 6vw 0">
+            <h3 class="bg-success  p-1 d-flex" style="position: fixed;width:65vw ;margin: 10px 0; padding: 10px; display: flex; justify-content: space-between; align-items: center;"><span class="align-self-start"></span><button class="text-white btn fw-bolder btn-dark align-self-end" data-bs-toggle="modal" data-bs-target="#chatpopup">...</button></h3><br><br><br>
+        </div>
+        <div class="d-flex fixed-bottom" id="sendmsg" style="margin-left: 30vw;">
+        <form onsubmit="sendmsg(event)"
+        class="input-group bg-info p-2 justify-content-center rounded-4">
+        <input class="input-group-text bg-light" name="msg" style="width: 55vw;">
+        <button class="btn btn-dark" style="width: 9vw">Send</button>
+    </form>
+    </div>
+</div>
+<div class="container">
+    <div class="modal fade" id="modal">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1>Create New Group</h1>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                    <div class="modal-body">
+                        <form id="creategroup" class="modal-content form-control" onsubmit="creategroup(event)">
+                            <input type="text" id="groupname" name="groupname" class="form-control" placeholder="Group Name" required>
+                            <br>
+                            <label for="users">Select Friends to Invite to Group:</label>
+
+                            <div id="invitecheckbox">
+                            </div>
+                            <button type="submit"  class="submit-button form-control bg-dark text-white" id="submit">Confirm</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                    </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="container">
+    <div class="modal fade" id="addmembers">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1>Add members</h1>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                    <div class="modal-body">
+                        <form class="modal-content form-control">
+                            <div class="d-flex" id="addcheckbox">
+                                <form 
+                                class="input-group bg-info p-2 justify-content-center rounded-4">
+                                <input class="input-group-text bg-light" name="search" style="width: 70vw;" type="search" id="search">
+                                <button class="btn btn-dark" style="width: 25vw" onclick="Addmembers(event)">Search</button>
+                            </div>
+                                <div id="searchlist">
+                                    
+                                </div>
+                            </form>
+  
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                    </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div class="container">
+    <div class="modal fade" id="makeadmin">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1>Make as Admin</h1>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                    <div class="modal-body">
+                        <form class="modal-content form-control">
+                            <h3>Group Members</h3>
+                                <div id="nonadminslist">
+                                    
+                                </div><br>
+                                
+                            </form>
+  
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                    </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+  
+  <div class="modal" id="chatpopup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+          <div class="modal-body">
+              <button type="button" class="btn-close float-end m-2 p-1" data-bs-dismiss="modal"></button>
+              <h5><a href="#"><button class="btn fw-bold" onclick="displayinviteusers(event)">Create New Group</button></a><br></h5>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal" id="popup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+          <div class="modal-body">
+              <button type="button" class="btn-close float-end m-2 p-2" data-bs-dismiss="modal"></button>
+              <h5><a href="#"><button class="btn fw-bold" data-bs-toggle="modal" data-bs-target="#makeadmin" onclick="getnonadmins()">Make Admin</button></a><br></h5>
+              <h5><a href="#" id="invite"><button class="btn fw-bold" data-bs-toggle="modal" data-bs-target="#addmembers">Add Members</button></a><br></h5>
+              <h5><a href="#"><button class="btn fw-bold" data-bs-toggle="modal" data-bs-target="#makeadmin" onclick="getadmins()">Remove As Admin</button></a><br></h5>   
+              <h5><a href="#"><button class="btn fw-bold" data-bs-toggle="modal" data-bs-target="#makeadmin" onclick="removegroupmember()">Remove Group Member</button></a><br></h5>   
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="modal" id="requests" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <h3 class="modal-header">Requests
+        <button type="button" class="btn-close float-end" data-bs-dismiss="modal"></button></h3>
+        <div class="modal-body" id="alerts">       
+     </div>
+    </div>
+  </div>
+ </div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+      <script src="../public/js/groupchat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+    integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js"
+    integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous">
+  </script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</body>
+</html>
