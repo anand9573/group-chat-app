@@ -2,28 +2,27 @@ const Sequelize = require("sequelize")
 
 const sequelize = require("../Util/Database")
 
-const Messages = sequelize.define("messages", {
+const Archievedchats = sequelize.define("Archievedchats", {
     id: {
         type: Sequelize.UUID,
         allowNull: false,
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true
     },
-    sent_to: {
-        type: Sequelize.CHAR,
+    user_id: {
+        type: Sequelize.STRING,
+        allowNull: false
     },
     message: {
-        type: Sequelize.TEXT
+        type: Sequelize.STRING,
+        allowNull: false
     },
-    file: {
-        type: Sequelize.STRING
-    },
-    url: {
-        type: Sequelize.STRING
+    sent_to: {
+        type: Sequelize.CHAR,
     },
     time_stamp:{
         type:Sequelize.DATE
     }
 })
 
-module.exports = Messages
+module.exports = group

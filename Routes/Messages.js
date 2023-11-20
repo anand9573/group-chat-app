@@ -7,5 +7,5 @@ const MessagesController = require("../Controllers/Messages")
 
 MessagesRouter.post("/sent_to/:send_to",Middleware.authentication, MessagesController.postMesssages)
 MessagesRouter.get("/:userId/:user2Id",Middleware.authentication, MessagesController.getOneToOneMessages)
-MessagesRouter.get("/:groupId",Middleware.authentication, MessagesController.getGroupMessages)
+MessagesRouter.get("/to/:groupId/:offset",Middleware.authentication, MessagesController.getGroupMessages);
 module.exports = MessagesRouter  

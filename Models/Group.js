@@ -11,7 +11,8 @@ const group = sequelize.define("group", {
     },
     Name: {
         type: Sequelize.STRING,
-        allowNull: false
+        allowNull: false,
+        unique:true
     }
 })
 

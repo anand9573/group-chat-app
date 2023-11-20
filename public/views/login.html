@@ -4,50 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="../public/css/main.css">
+    <link rel="stylesheet" href="../css/main.css">
     <title>Home</title>
-    <style>
-      *{
-        font-style: italic;
-        font-weight: bold;
-      }
-      .form{
-        margin: 8px 8px;
-      }
-/* .popup {
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
-}
-
-.popup-content {
-  display: none;
-  position: absolute;
-  background-color: #f9f9f9;
-  border: 1px solid #ccc;
-  padding: 10px;
-  min-width: 100px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.popup.active .popup-content {
-  display: block;
-} */
-    </style>
 </head>
 <body>
   <h2 class="text-center mb-0 bg-warning p-2">Chat Group App</h2>
    
-    <!-- <div class="position-static navbar navbar-expand-sm navbar-dark bg-dark">
-        <div class="container">
-             <a href="#" class="navbar-brand">Group Chat App</a> -->
             <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-label="Expand-Navigation">
             <span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="nav">
                 <ul class="navbar-nav">
-                    <li class="nav-item nav-link"><a href="./signup.html" class="text-white font-weight-bold">Home</a></li>
-                    <li class="nav-item nav-link"><a href="./groupchat.html">My Groups</a></li>
-                    <li class="nav-item nav-link"><a href="./logout.html">Logout</a></li>
+                    <li class="nav-item nav-link"><a href="http://localhost:3000/groupchat.html">My Groups</a></li>
+                    <li class="nav-item nav-link"><a href="#">Logout</a></li>
                 </ul>
             </div>
             </div>
@@ -64,10 +32,16 @@
             <input type="password" id="password" name="password" class="form form-control" placeholder="Password" required>
             <button class="button form form-control mt-2 bg-success text-white fw-bolder" id="submit">Login</button>
         </form>
-        <button class="btn m-3 bg-dark"><a href="./signup.html" style="text-decoration: none;">New User? -Signup</a></button>
+        <form
+        class="input-group justify-content-center rounded-4">
+        <button class="input-group-text m-3 bg-dark"><a href="http://localhost:3000/signup.html" style="text-decoration: none;">New User? -Signup</a></button>
+        <button class="input-group-text m-3 bg-dark"><a href="http://localhost:3000/forgotpassword.html" style="text-decoration: none;">Forgot Password</a></button>
+    </form>
+        
     </div>
 </div>    
-  <script src="../public/js/login.js"></script>
+<script src="socket.io/socket.io.js"></script>
+  <script src="../js/login.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
     integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
   </script>
@@ -76,18 +50,5 @@
     integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous">
   </script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <!-- <script>
-        document.getElementById('myButton').addEventListener('click', function() {
-  var popup = document.getElementById('myPopup');
-  popup.classList.toggle('active');
-});
-
-document.addEventListener('click', function(event) {
-  var popup = document.getElementById('myPopup');
-  if (!popup.contains(event.target) && !event.target.matches('#myButton')) {
-    popup.classList.remove('active');
-  }
-});
-    </script> -->
 </body>
 </html> 

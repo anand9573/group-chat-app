@@ -14,7 +14,7 @@
         margin: 5px 5px;
       }
     </style>
-    <link rel="stylesheet" href="../public/css/main.css">
+    <link rel="stylesheet" href="../css/main.css">
 </head>
 <body>
     <h2 class="text-center mb-4 bg-warning p-2">Chat Group App</h2>
@@ -24,14 +24,15 @@
             <form class="form" onsubmit="senddata(event)">
             <input type="text" id="name" class="form form-control" name="name" placeholder="Name" required>
             <input type="email" name="email" id="email" class="form form-control" placeholder="Email" required>
-            <input type="tel" id="number" name="phone" class="form form-control" placeholder="Mobile" required>
+            <input type="tel" id="number" name="phone" class="form form-control" placeholder="Mobile" maxlength="10" minlength="10" required>
             <input type="password" id="password" name="password" class="form form-control" placeholder="Password" required>
             <button class="button form  form-control mt-2 bg-success text-white fw-bolder" id="submit">Signup</button>
         </form>
-        <button class="btn m-3 bg-dark"><a href="./login.html" class="font-weight-bold">Existing User? -Login</a></button>
+        <button class="btn m-3 bg-dark"><a href="http://localhost:3000/login.html" class="font-weight-bold">Existing User? -Login</a></button>
     </div>
     </div>
-    <script src="../public/js/signup.js"></script>
+ <script src="socket.io/socket.io.js"></script>
+    <script src="../js/signup.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
     integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
   </script>

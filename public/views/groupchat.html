@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/ico" href="http://localhost:3000/favicon.ico">
+<meta name="msapplication-TileColor" content="#da532c">
+<meta name="theme-color" content="#fde6e6">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-iYQeCzEYFbKjA/T2uDLTpkwGzCiq6soy8tYaI1GyVh/UjpbCx/TYkiZhlZB6+fzT" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="../css/main.css">
+    <title>Group Chat App</title>
+<style>
+    .hover{
+        background-color: #fff;
+        color: #0a0906;
+    }
+    .flex-container{
+        display: flex;
+        flex-direction: column;
+    }
+    .item1{
+        background: #0a0906;
+        text-align: center;
+        color: rgb(237, 141, 16);
+        width: 100vw;
+        height: fit-content;
+        padding: 3px;
+    }
+    .item2{
+        display: flex;
+        flex-direction: column;
+    }
+    .navbarr{
+        align-self: end;
+    }
+    .flex-container2{
+        display: flex;
+        flex-direction: column;
+        width: 100vw; 
+     height: fit-content;
+        padding: 3px;
+        background: rgb(224, 25, 19);
+    }
+    .flex-container3{
+        align-self: flex-start;
+        display: flex;
+        flex-direction: column;
+        width: 25vw; 
+     height: fit-content;
+     padding: 3px;
+     background: #066c82a9;
+    }
+    .flex-container4{
+        align-self: flex-end;
+        display: flex;
+        flex-direction: column;
+        height: max-content;
+        width: 75vw; 
+        padding: 3px;
+        background: #ec45c860;
+    }
+    
+    .flexbox1{
+        display: flex;
+        flex-direction: row;
+        background-color:aquamarine;
+        width: 24vw;
+        padding: 3px;
+        align-self: flex-start;
+    }
+    .flexbox{
+        display: flex;
+        flex-direction: row;
+        background-color:aquamarine;
+        width: 100vw;
+        padding: 3px;
+        align-self: flex-end;
+        margin-bottom: 2px;
+    }
+    .flexbox1-item{
+        justify-content: space-evenly;
+    }
+    .flexbox-group1{
+        display: flex;
+        background-color: rgb(170, 244, 60);
+        width: 10vw;
+        border: 2px;
+        padding: 3px;
+        position: fixed;
+    }
+    .headbtn  {
+        background-color: #066c82a9;
+        align-self: end;
+    }  /* .item2{
+        background: #066c82a9;
+        color: antiquewhite;
+        
+    } */
+    .button{
+        background-color: #a1e772;
+        width: 24vw;
+    cursor: pointer;
+    color: black;
+        height: 50px;
+        padding: 10px;
+        border: 2px solid blueviolet;
+        border-radius: 4px;
+    }
+    .button:hover{
+ color: rgb(222, 216, 216);
+ background-color: rgb(4, 5, 4);
+    }
+    .item3{
+        background: #000;
+    }
+    /* .popup {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        background-color: #fff;
+        padding: 20px;
+        border: 1px solid #ccc;
+        box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    } */
+    .closed{
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        cursor: pointer;
+    }
+    li{
+        list-style: none;
+
+    }
+    i{
+        size: 50px;
+    }
+    .hovertext {
+  position: relative;
+  border-bottom: 1px dotted black;
+}
+
+.hovertext:before {
+  content: attr(data-hover);
+  visibility: hidden;
+  opacity: 0;
+  width: 140px;
+  background-color: black;
+  color: #fff;
+  width: max-content;
+  height: max-content;
+  font-size: medium;
+  padding: 10px;
+  text-align: center;
+  border-radius: 5px;
+  padding: 5px 0;
+  transition: opacity 1s ease-in-out;
+
+  position: absolute;
+  z-index: 1;
+  /* left: 100%; */
+  bottom: 10%;
+  right: 100%;
+}
+
+.hovertext:hover:before {
+  opacity: 1;
+  visibility: visible;
+}
+.popup {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+    background-color: #0a1111;
+}
+
+.popup .closed {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    color:blue ;
+    font-weight: bolder;
+    font-size: larger;
+}
+
+.popup ul {
+    list-style: none;
+    display: flex;
+    color: aqua;
+}
+
+.popup button {
+    color: #1ecc21;
+    margin: 5px;
+    padding: 10px;
+    background-color: #ccc;
+    border: 1px solid #999;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    
+</style>
+<body>
+    <div class="flex-container position-fixed navbar navbar-expand-sm navbar-dark bg-dark">
+        <div class="item1"><div class="float-start m-2">
+            <i class="fa-brands fa-whatsapp fa-2x" style="color: #1ecc21;"></i>
+        </div><h2 class="hovertext float-start mt-1 ml-2" data-hover="Welcome to group chat app!">Chat Group App</h2></div>
+        <div class="item2">
+            <button class="navbarr navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-label="Expand-Navigation">
+                <span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="nav">
+                    <div>
+                    <ul class="flex-container2 navbar-nav">
+                    <!-- <li class="nav-item nav-link"><a href="#/home" id="home">Home</a></li> -->
+                    <li class="nav-item nav-link disabled"><a href="#/home" class="text-white font-weight-bold" id="home">My Chats</a></li>
+                    <li class="nav-item nav-link"><a href="#" onclick="logout()" class="font-weight-bold" id="logout">Logout</a></li>
+                </ul>
+                </div>
+            </div>
+        </div>
+        <div class="flexbox">
+            <div class="flex-container3 rounded-3">
+                <div class="align-self-start rounded-3 p-1" style="width:25vw;display:flex;flex-direction:row;background-color: rgb(239, 214, 24);"><span id="gname" ><h4>All Chats<h4>
+                <button data-bs-toggle="modal"data-bs-target="#chatpopup" class="btn btn-primary">&#9776;</button>
+                </div>
+                <div class="chats align-self-start" id="groups">
+                </div>
+            </div>
+            <!-- <div class="align-self-end">
+                <h3 class="bg-success"><span class="flexbox2"></span><button class="text-white btn fw-bolder btn-dark" data-bs-toggle="modal"data-bs-target="#grouppopup">&#9776;</button></h3>
+            </div> -->
+            <div class="flex-container4">
+            <div class="bg-success p-2 d-flex rounded" style="width:75vw ;display: flex; justify-content: space-between; align-items: center;" id="grouphead">
+                <!-- <span class="align-self-start text-white" id="groupnamee"></span><button class="hovertext text-white btn fw-bolder btn-dark align-self-end" data-bs-toggle="modal"data-bs-target="#grouppopup" data-hover="Group Options">&#9776;</button> -->
+            </div>
+            <div id="msg" class="fixed-end align-self-end rounded p-3 position-relative sticky-top" style="width: 74vw; height: 66vh; background-color: #e4ebe5; box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1); overflow-y: auto;margin-bottom: 30vw;">
+            </div>
+            <div class="d-flex sticky-bottom" id="sendmsg">
+                <form
+                class="input-group bg-info justify-content-center rounded-4">
+                <a class="hovertext input-group-text rounded-4 bg-dark text-white" style="font-size: 2em;" data-hover="Send Images or Files" data-bs-target="#uploadfile" data-bs-toggle="modal">
+                    <i class="fas fa-paperclip"></i>
+                </a>
+                <input class="input-group-text bg-light rounded-3 fw-bold m-1" name="msg" id="messagee" style="width: 66vw;" placeholder="Type Message...">
+                <button class="hovertext input-group-text rounded-4 bg-dark text-white" style="font-size: 2em;" data-hover="Send Message" onclick="sendmsg(event)">&#9658;</button>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>        
+<div class="container">
+    <div class="modal fade" id="modal">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1>Create New Group</h1>
+                    <button type="button" class="btn-close float-end" data-bs-dismiss="modal"></button>
+                </div>
+                    <div class="modal-body">
+                        <form id="creategroup" class="modal-content form-control" onsubmit="creategroup(event)">
+                            <input type="text" id="groupname" name="groupname" class="form-control" placeholder="Group Name" required>
+                            <br>
+                            <label for="users">Select Friends to Invite to Group:</label>
+
+                            <div id="invitecheckbox">
+                            </div>
+                            <button type="submit"  class="submit-button form-control bg-dark text-white" id="submit">Confirm</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                    </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<div class="container">
+    <div class="modal fade" id="addmembers">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1>Add members</h1>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                    <div class="modal-body">
+                        <form class="modal-content form-control">
+                            <div class="d-flex" id="addcheckbox">
+                                <form 
+                                class="input-group bg-info p-2 justify-content-center rounded-4">
+                                <input class="input-group-text bg-light" name="search" style="width: 70vw;" type="search" id="search">
+                                <button class="btn btn-dark" style="width: 25vw" onclick="Addmembers(event)">Search</button>
+                            </div>
+                                <div id="searchlist">
+                                    
+                                </div>
+                            </form>
+  
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                    </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div class="container">
+    <div class="modal fade" id="makeadmin">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1>Make as Admin</h1>
+                    <button class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                    <div class="modal-body">
+                        <form class="modal-content form-control">
+                            <h3>Group Members</h3>
+                                <div id="nonadminslist">
+                                </div><br>
+                            </form>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="container">
+    <div class="modal fade" id="uploadfile">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <h1 class="m-2 p-1">Upload Any File</h1>
+                <div class="modal-header">
+    <form id="imageUploadForm" enctype="multipart/form-data" onsubmit="uploadFiles(event)">
+        <input type="file" name="file" id="file" accept="*"><div id="message"></div><span id="uploading"></span><button type="submit" id="sendFile" class="btn btn-dark m-2">Upload</button>
+    </form>
+                </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- 
+<div class="popup m-0" id="uploadpopup">
+    <span class="closed" onclick="closePopup()">&times;</span>
+    <ul class="ml-0 d-flex">
+        <button data-bs-target="#uploadfile" data-bs-toggle="modal" onclick="uploadimage()"><i class="fas fa-image fa-3x"></i>
+        </button>
+        <button data-bs-target="#uploadfile" data-bs-toggle="modal" onclick="uploadvideo()"><i class="fas fa-video fa-3x"></i>
+        </button>
+        <button data-bs-target="#uploadfile" data-bs-toggle="modal" onclick="uploadfile()"><i class="fas fa-file fa-3x"></i>
+        </button>
+    </ul>
+</div> -->
+  
+  <div class="modal" id="chatpopup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+          <div class="modal-body">
+              <button type="button" class="btn-close float-end m-2 p-1" data-bs-dismiss="modal"></button>
+              <h5><a href="#"><button class="btn fw-bold" onclick="displayinviteusers(event)">Create New Group</button></a><br></h5>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal" id="grouppopup" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+          <div class="modal-body">
+              <button type="button" class="btn-close float-end m-2 p-2" data-bs-dismiss="modal"></button>
+              <h5><a href="#"><button class="btn fw-bold" data-bs-toggle="modal" data-bs-target="#makeadmin" onclick="getnonadmins()">Make Admin</button></a><br></h5>
+              <h5><a href="#" id="invite"><button class="btn fw-bold" data-bs-toggle="modal" data-bs-target="#addmembers">Add Members</button></a><br></h5>
+              <h5><a href="#"><button class="btn fw-bold" data-bs-toggle="modal" data-bs-target="#makeadmin" onclick="getadmins()">Remove As Admin</button></a><br></h5>   
+              <h5><a href="#"><button class="btn fw-bold" data-bs-toggle="modal" data-bs-target="#makeadmin" onclick="removegroupmember()">Remove Group Member</button></a><br></h5>   
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="requests" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <h3 class="modal-header">Requests
+        <button type="button" class="btn-close float-end" data-bs-dismiss="modal"></button></h3>
+        <div class="modal-body" id="alerts">       
+     </div>
+    </div>
+  </div>
+ </div>
+ <button id="submitt">submit</button>
+ 
+ <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+ <script src="/socket.io/socket.io.js"></script>
+<script>
+
+        const openButton = document.getElementById("openpopup");
+        const popup = document.getElementById("uploadpopup");
+        function openPopup(event) {
+            const buttonRect = openButton.getBoundingClientRect();
+            const x = buttonRect.right;
+            const y = buttonRect.top;
+            
+            popup.style.left = y-1.8*x + "px";
+            popup.style.bottom =  "10vh";
+            
+            popup.style.display = "block";
+        }
+        
+        // // Function to close the popup
+        // function closePopup() {
+        //     popup.style.display = "none";
+        // }
+        
+//         // openButton.addEventListener("click", (event) => openPopup(event));
+
+//         const uploadButton = document.getElementById('uploadButton');
+
+// if (uploadButton) {
+//     uploadButton.addEventListener('click',uploadfilee(event) )
+//     async function uploadfilee(e) {
+//         e.preventDefault();
+
+//         const formData = new FormData();
+//         const imageInput = document.getElementById('imageInput');
+//         const file = imageInput.files[0];
+
+//         if (file) {
+//             formData.append('image', file);
+
+//             try {
+//                 const response = await fetch('http://localhost:3000/file/upload', {
+//                     method: 'POST',
+//                     body: formData
+//                 });
+
+//                 if (response.status === 200) {
+//                     console.log('Image uploaded successfully');
+//                 } else {
+//                     console.error('Error uploading image');
+//                 }
+//             } catch (error) {
+//                 console.error('Network error:', error);
+//             }
+//         }
+//     };
+// }
+
+        // function displayFileName() {
+        //     const fileInput = document.getElementById("fileInput");
+        //     const inputGroupText = document.querySelector(".input-group-text");
+        //     const sourceInput = document.querySelector("input[name='source']");
+            
+        //     if (fileInput.files.length > 0) {
+        //         const fileName = fileInput.files[0].name;
+        //         sourceInput.value = fileName;
+        //     }
+        // }
+
+</script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="../js/groupchat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+    integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous">
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js"
+    integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous">
+  </script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</body>
+</html>
+<!-- //   function openWhatsApp() {
+//         const phoneNumber = 'your_phone_number';
+//         const message = 'Hello! I have a question.';
+//         const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+//         window.open(whatsappURL, '_blank');
+//     } -->

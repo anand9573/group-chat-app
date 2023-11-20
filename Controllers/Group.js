@@ -1,16 +1,21 @@
 const MessagesDB = require("../Models/Messages")
-const GroupMembersDB = require("../Models/GroupMember")
-const sequelize=require('../Util/Database')
-const GroupDB = require("../Models/Group")
-const UserDB = require("../Models/User")
-const { Op } = require("sequelize")
-const group_members = require("../Models/GroupMember")
+const GroupMembersDB = require("../Models/GroupMember");
+const sequelize=require('../Util/Database');
+const GroupDB = require("../Models/Group");
+const UserDB = require("../Models/User");
+const { Op } = require("sequelize");
+const s3services=require('../S3services.js/S3services');
+const path = require('path');
 
 exports.postCreateGroup = async (req, res, next) => {
 let t=await sequelize.transaction();
     const { groupname, users } = req.body
     const Id = req.params.userId
     try {
+        const groupexist=await GroupDB.findOne({where:{Name:groupname}})
+        if(groupexist){
+            return res.status(400).json({message:'Group name already exist',success:false});
+        }else{
         const Group = await GroupDB.create({
             Name: groupname
         },{transaction:t})
@@ -38,13 +43,14 @@ const groups = await GroupDB.findAll({
         }
     }
 });
-        res.status(200).json({groupCreated: Group ,users: GroupUser,groups:groups});
+    res.status(200).json({groupCreated: Group ,users: GroupUser,groups:groups});
+}
     } catch (err) {
         if (t) {
             await t.rollback();
         }
         console.log(err, "While Creating Group")
-        res.status(500).json({ message: "Error On Server" })
+        res.status(500).json({ message: "Error On creating group" })
     }
 }
 
@@ -52,12 +58,11 @@ exports.addMemberGroup=async(req,res,next)=>{
     try {
         const { groupid, users } = req.body;
         const userId = req.params.userId;
-    
-        if (!groupid) {
+        if(!groupid) {
             throw new Error("Missing groupid in request body");
         }
     
-        let groupUser = null;
+let groupUser = null;
     
 if (users && users.length > 0) {
     const userUpdates = users.map(user => ({ groupId: groupid }));
@@ -125,7 +130,8 @@ exports.getGroupMembers = async (req, res, next) => {
     try {
         const groupMembers = await GroupMembersDB.findAll({
             where: { groupId: groupId },
-            attributes: ["id", "userId", "admin"]
+            attributes: ["id", "userId", "admin"],
+            order: [['createdAt', 'ASC']]
         })
         const userID = groupMembers.map(user => user.userId)
 
@@ -252,10 +258,147 @@ exports.recentmsg=async(req,res,next)=>{
             limit: 10,
             offset: messages
           });
-          
         res.status(201).json({users:activeuser,success:false,msgs:msgs});
     }catch(err){
         res.status(500).json({error:err,success:false});
     }
 
 }
+
+exports.uploadImageFile = async (req, res) => {
+    try {
+        const file = req.file;
+        if (file) {
+            const groupId = req.header("GroupId");
+            const grp = await GroupDB.findOne({ where: { id: groupId } })
+            const result = await s3services.uploadFile(file);
+            console.log(result)
+            const ext=path.extname(file.originalname)
+            let msg;
+            if(grp){
+                msg = await MessagesDB.create({
+                sent_to:groupId,
+                file:`${file.originalname}/${new Date()}${ext}`,
+                    url: result.Location,
+                    time_stamp: new Date(), 
+                    userId: req.user.id,
+                    groupId: groupId,
+                });
+            }else{
+                msg = await MessagesDB.create({
+                    sent_to:groupId,
+                        file:`${file.originalname}/${new Date()}${ext}`,
+                        time_stamp: new Date(), 
+                        userId: req.user.id,
+                        url:result.Location
+                    });
+            }
+            // const message = await req.user.createChat({ image: fileUrl, GroupId: grp.id })
+           res.status(200).json({ message:msg,result, success: true });
+        }else{
+            console.log(file)
+        }
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ err, success: false });
+    }
+
+}
+
+// const storage = multer.diskStorage({
+//     destination:(req, file, cb) => {
+//         const uploadPath = 'uploads/';
+//         fs.mkdirSync(uploadPath, { recursive: true });
+//         cb(null, uploadPath);
+//       },
+//     filename: function (req, file, cb) {
+//       cb(null, Date.now() + path.extname(file.originalname));
+//     },
+// });
+
+// const upload = multer({
+//     dest: 'uploads/',
+//     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
+//   });
+
+// exports.postuploadfile = (upload.single('file'),async (req, res, next) => {
+//     try {
+//         const groupId = req.body.groupId;
+//         const userId = req.user.id;
+//         const file = req.file; 
+//         console.log(file,'-----<')
+//         var filename = 'images/' + file.originalname + '-' + Date.now();
+//         const params={
+//             Bucket:process.env.BUCKET_NAME,
+//             Key:filename,
+//             Body:file.buffer,
+//             ACL:'public-read'
+//         }
+
+//         AWS.config.update({
+//             accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+//             secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+//             region: process.env.AWS_REGION,
+//           });
+          
+//           // Create an S3 instance
+//           const s3 = new AWS.S3();
+//         s3.upload(params,async(err,data)=>{
+//             if (err) {
+//                 console.error('Upload to S3 failed:', err);
+//                 return res.status(500).json({ message: 'File upload failed.' });
+//               }
+          
+//               // Optionally, you can remove the file from your server
+//               fs.unlinkSync(file.path);
+//               const msg = await MessagesDB.create({
+//                 sent_to: groupId,
+//                 message: data.Location,
+//                 time_stamp: new Date(), 
+//                 userId: userId,
+//                 groupId: groupId,
+//             });
+          
+//               res.status(200).json({ message: 'File uploaded successfully.', fileURL: data.Location });
+//             });
+//         } catch (err) {
+//             console.error(err);
+//             res.status(500).json({ fileURL: '', success: false, err: err });
+//         }
+//     })
+    
+    //   });
+    // });
+    
+//     if (fileURL) {
+//         const msg = await MessagesDB.create({
+//             sent_to: groupId,
+//             message: fileURL,
+//             time_stamp: new Date(), 
+//             userId: userId,
+//             groupId: groupId,
+//         });
+//         res.status(200).json({ fileURL, success: true, err: null });
+//     } else {
+//         res.status(500).json({ fileURL: '', success: false, err: 'File upload failed' });
+// }
+
+// exports.downloadsrc=async(req,res)=>{
+//     try{
+//         if(!req.user.ispremiumuser){
+//             return res.status(401).json({sucess:false,message:'User is not a premium user'});
+//         }
+//         const expenses=await userServices.getExpenses(req);
+//         const stringifiedExpenses=JSON.stringify(expenses);
+//         const userid=req.user.id
+//         const filename=`message${userid}/${new Date()}.txt`;
+//         const fileURL=await s3services.uploadToS3(stringifiedExpenses,filename);
+//         await req.user.createFilesdownloaded({fileurl:fileURL})
+//         const filesdownloaded=await req.user.getFilesdownloadeds()
+//         res.status(200).json({fileURL,success:true,err:null,filesdownloaded})
+//     }catch(err){
+//         console.log(err)
+//         res.status(500).json({fileURL:'',success:false,err:err})
+
+//     }
+// }

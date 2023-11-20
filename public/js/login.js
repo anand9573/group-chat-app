@@ -13,7 +13,7 @@ async function login(e){
             localStorage.setItem('token',res.data.tokenID);
             localStorage.setItem('userid',res.data.userID);
             alert('user logged in successfully')
-            window.location.href = "../../views/groupchat.html";
+            window.location.href = "http://localhost:3000/groupchat.html";
         }
             }catch(err){
                 console.log(err)
