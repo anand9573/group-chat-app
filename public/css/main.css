@@ -35,7 +35,9 @@ a{
   font-size: small;
   margin-bottom: 5px;
 }
-
+.small-font {
+  font-size: 0.85rem; /* Adjust the font size as needed */
+}
 .message-text {
   word-wrap: break-word; /* Allow long text to wrap */
   white-space: pre-line; /* Preserve line breaks */

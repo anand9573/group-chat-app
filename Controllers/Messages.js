@@ -5,17 +5,17 @@ const User=require('../Models/User');
 const group_members = require("../Models/GroupMember");
 const Messages = require("../Models/Messages");
 
-
 exports.postMesssages = async (req, res, next) => {
 let t=await sequelize.transaction();
     
     const send_to = req.params.send_to
     const user=await User.findByPk(send_to)
-    const { message, date, userID } = req.body
+    const { message, date, userID ,Name} = req.body
     console.log({ message, date, userID });
     try {
         if(!user){
             const msg = await MessagesDB.create({
+                sent_by:Name,
                 sent_to: send_to,
                 message: message,
                 time_stamp: date,
@@ -26,6 +26,7 @@ let t=await sequelize.transaction();
             res.status(200).json({ message: msg, status: true });
         }else{
             const msg = await MessagesDB.create({
+                sent_by:Name,
                 sent_to: send_to,
                 message: message,
                 time_stamp: date,
@@ -140,6 +141,7 @@ exports.getGroupMessages = async (req, res, next) => {
         res.status(500).json({ message: "Somthing Went Wrong" })
     }
 }
+
 
 
 

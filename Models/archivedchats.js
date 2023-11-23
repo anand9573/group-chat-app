@@ -9,20 +9,30 @@ const Archievedchats = sequelize.define("Archievedchats", {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true
     },
-    user_id: {
-        type: Sequelize.STRING,
-        allowNull: false
-    },
-    message: {
-        type: Sequelize.STRING,
-        allowNull: false
+    sentby: {
+        type: Sequelize.CHAR,
     },
     sent_to: {
         type: Sequelize.CHAR,
     },
+    message: {
+        type: Sequelize.TEXT
+    },
+    file: {
+        type: Sequelize.STRING
+    },
+    url: {
+        type: Sequelize.STRING
+    },
     time_stamp:{
+        type:Sequelize.DATE
+    },
+    userId: {
+        type: Sequelize.STRING,
+    },
+    groupId:{
         type:Sequelize.DATE
     }
 })
 
-module.exports = group
+module.exports = Archievedchats

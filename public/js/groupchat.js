@@ -2,8 +2,36 @@ const socket = io('http://localhost:3000');
 const token=localStorage.getItem('token');
 socket.on('connect',()=>{
     console.log(`you are connected with ${socket.id}`)
-    socket.emit('custom-event',10,'hi',{a:'a'})
-    always()
+    const decodeToken=parseJwt(token)
+    socket.emit('token',decodeToken)
+})
+const decodeToken=parseJwt(token)
+const userId = decodeToken.id; // You should replace this with the actual user ID
+socket.emit('setUserId', userId);
+
+// socket.on('dissconnect',(socket)=>{
+//     console.log(`you are dissconnected with ${socket.id}`)
+//     const decodeToken=parseJwt(token);
+//     socket.emit('updateonline',decodeToken.id)
+// })
+
+// socket.on('dissconnect', (ok) => {
+//     // console.log(`you are disconnected with ${socket.id}`);
+//     const decodeToken = parseJwt(token);
+//     socket.emit('updateonline', decodeToken.id);
+//     console.log('Disconnected from the server');
+//   });
+  
+// socket.on('disconnect', (decodeToken) => {
+//     console.log('Disconnected from the server');
+//     // Additional logic you want to execute when the connection is lost
+//   });
+socket.on('verified',(verified)=>{
+    if(verified===true){
+        always()
+    }else{
+        window.location.href=`http://localhost:3000/login.html`
+    }
 })
 socket.on('receive-message',(data)=>{
     const decodeToken=parseJwt(token)
@@ -18,7 +46,7 @@ socket.on('receive-message',(data)=>{
     // }
     const amOrPm = hours >= 12 ? 'pm' : 'am';
     if(data.groupid===localStorage.getItem('groupid') || data.groupid===decodeToken.id && data.userID===localStorage.getItem('groupid')){
-        msg.innerHTML+=`<div class="message-container floatright">
+        msg.innerHTML+=`<div class="message-container">
         <div class="sender-name text-success">${data.Name}</div>
         <div class="message-text">${data.message}</div>
         <div class="timestamp text-primary">${formattedHours}:${formattedMinutes} ${amOrPm}</div>
@@ -37,13 +65,10 @@ async function always(){
         const decodeToken=parseJwt(token)
     console.log(decodeToken)
     const userId = decodeToken.id; 
-    // socket.emit('login', userId);
-    // socket.on('onlineUsers', async(onlineUsers) => {
-        //     console.log('Online Users:', onlineUsers);
-        // document.getElementById(`${userId}`).innerHTML+=`<br><h6 class="text-dark" id="${userId}/online">hii</h6>`
-        // if(onlineUsers[userId]){
-            //     document.getElementById(`${userId}/online`).textContent=onlineUsers[userId]
-            // }
+    socket.emit('login', userId);
+    socket.on('onlineUsers', async(onlineUsers) => {
+ console.log(onlineUsers)
+    })
             try{
                 await getusers();
                 await displaygroup();
@@ -74,9 +99,25 @@ async function always(){
     
 //     const useronline = {};
 // socket.on('userOffline', (userId, lastonline) => {
-    //   console.log('User offline:', userId, lastonline);
-    //   useronline[userId] = lastonline; // Update useronline object with last online information
-    // });
+//       console.log('User offline:', userId, lastonline);
+//       useronline[userId] = lastonline; 
+//     });
+// socket.on('lastonline', (lastonline) => {
+
+//     });
+socket.on('onlineat', (userid,lastonline) => {
+      console.log('------------------------------------------->user online at', userid, lastonline);
+const useronline=document.getElementById(`online`) 
+      if(useronline){
+        if(lastonline==='online now'){
+            useronline.textContent=`online now`
+        }else{
+            useronline.textContent=`last seen at ${lastonline}`
+        }
+}else{
+    console.log('no such id found')
+}
+    });
 }
 
 // socket.on("user-created", data => {
@@ -192,16 +233,18 @@ async function getGroupMessages(groupId,groupname,offset){
         // offset += 10;
         
         // if(offset<10){
-        //     msg.innerHTML=`<button class="btn btn-info rounded p-1 m-2" id="oldmessages" onclick="getGroupMessages('${groupId}','${groupname}',${offset})"><span class="text-center">Get Old Messages</span></button>`
-        // }
-        // document.getElementById("groupnamee").textContent = `${groupname}`;
-        // document.getElementById("oldmessages").addEventListener("click", () => {
-        //     getGroupMessages(`${groupId}`, `${groupname}`,`${offset}`);
-        // });
-        console.log(res.data.messages);
-        if(offset===0){
-            getgrouphead(groupname);
-        }
+            //     msg.innerHTML=`<button class="btn btn-info rounded p-1 m-2" id="oldmessages" onclick="getGroupMessages('${groupId}','${groupname}',${offset})"><span class="text-center">Get Old Messages</span></button>`
+            // }
+            // document.getElementById("groupnamee").textContent = `${groupname}`;
+            // document.getElementById("oldmessages").addEventListener("click", () => {
+                //     getGroupMessages(`${groupId}`, `${groupname}`,`${offset}`);
+                // });
+                console.log(res.data.messages);
+                socket.emit('lastonline',groupId);
+                if(offset===0){
+                    getgrouphead(groupId,groupname);
+                   
+                }
         displaymessage(res)
 
     
@@ -213,17 +256,20 @@ async function getGroupMessages(groupId,groupname,offset){
     msg.innerHTML+=`<h6 class="fst-italic text-white rounded-pill bg-danger p-2">Something went wrong try after sometime!</h6>`;
     }
 }
-function getgrouphead(groupname){
+function getgrouphead(groupid,groupname){
     const users=JSON.parse(localStorage.getItem('users'));
+    const user=JSON.parse(localStorage.getItem('user'));
+    const arrayFromValues = Object.values(users).map(user => user.id);
+    console.log('ok--->',arrayFromValues,groupid);
     const grouphead=document.getElementById('grouphead');
-    for (item of users){
-        if(item.Name===groupname){
-            grouphead.innerHTML=`<span class="align-self-start text-white mt-1" id="groupnamee"></span><button class="hovertext text-white btn fw-bolder btn-dark align-self-end" data-bs-toggle="modal" data-bs-target="#modal" data-hover="Options">...</button>`
+        if(arrayFromValues.includes(groupid)){
+            grouphead.innerHTML=`<div class="align-self-start text-white mt-1"><span  id="groupnamee" class="fs-5"></span><br>
+            <span class="fw-bold small-font" id="online" style="color:orange;"></span></div>
+            <button class="hovertext text-white btn fw-bolder btn-dark align-self-end" data-bs-toggle="modal" data-bs-target="#modal" data-hover="Options">...</button>`
         }else{
             grouphead.innerHTML=`<span class="align-self-start text-white mt-1" id="groupnamee"></span><button class="hovertext text-white btn fw-bolder btn-dark align-self-end" data-bs-toggle="modal" data-bs-target="#grouppopup" data-hover="Options">=</button>`
         }
 
-    }
     const msg=document.getElementById('msg');
         msg.innerHTML=``;
     // <div class="message-container floatright">
@@ -266,18 +312,13 @@ async function displaymessage(res){
                 msg=document.getElementById('appendoldmsg');
                 id='appendoldmsg';
                 const decodeToken=parseJwt(token);
-                if(msgs.userId===decodeToken.id){
+    if(msgs.userId===decodeToken.id){
         if(!msgs.message){
             messages=`<div class="file-container floatright">
             <div class="sender-name text-success">you</div>
             <img src="${msgs.url}" style="width:40vw;height:auto" class="message-text" alt="${msgs.filename}">
             <div class="timestamp text-primary">${formattedHours}:${formattedMinutes} ${amOrPm}</div>
         </div>`+messages
-            // msg.innerHTML=`<div class="file-container floatright">
-            //                     <div class="sender-name text-success">you</div>
-            //                     <img src="${msgs.url}" style="width:40vw;height:auto" class="message-text" alt="${msgs.filename}">
-            //                     <div class="timestamp text-primary">${formattedHours}:${formattedMinutes} ${amOrPm}</div>
-            //                 </div>`+msg.innerHTML
                     }
         else{
             messages=`<div class="message-container floatright">
@@ -291,10 +332,10 @@ async function displaymessage(res){
                         // <div class="timestamp text-primary">${formattedHours}:${formattedMinutes} ${amOrPm}</div>
                         // </div>`+msg.innerHTML;
                     }
-                }else{
-                    if(!msgs.message){
+    }else{
+        if(!msgs.message){
                         messages=`<div class="file-container floatright">
-                        <div class="sender-name text-success">you</div>
+                        <div class="sender-name text-success">${msgs.sent_by}</div>
                         <img src="${msgs.url}" style="width:40vw;height:auto" class="message-text" alt="${msgs.filename}">
                         <div class="timestamp text-primary">${formattedHours}:${formattedMinutes} ${amOrPm}</div>
                         </div>`+messages
@@ -307,7 +348,7 @@ async function displaymessage(res){
                     }
                     else{
                         messages=`<div class="message-container">
-                        <div class="sender-name text-success">other</div>
+                        <div class="sender-name text-success">${msgs.sent_by}</div>
                         <div class="message-text">${msgs.message}</div>
                         <div class="timestamp text-primary">${formattedHours}:${formattedMinutes} ${amOrPm}</div>
                         </div>`+messages
@@ -319,11 +360,11 @@ async function displaymessage(res){
     }
 }
 
-            }else{
-                msg=document.getElementById('appendoldmsg');
+}else{
+    msg=document.getElementById('appendoldmsg');
                 id='msg';
                 const decodeToken=parseJwt(token);
-                if(msgs.userId===decodeToken.id){
+    if(msgs.userId===decodeToken.id){
         if(!msgs.message){
             messages+=`<div class="file-container floatright">
             <div class="sender-name text-success">you</div>
@@ -351,7 +392,7 @@ async function displaymessage(res){
                 }else{
                     if(!msgs.message){
                         messages+=`<div class="file-container floatright">
-                        <div class="sender-name text-success">you</div>
+                        <div class="sender-name text-success">${msgs.sent_by}</div>
                         <img src="${msgs.url}" style="width:40vw;height:auto" class="message-text" alt="${msgs.filename}">
                         <div class="timestamp text-primary">${formattedHours}:${formattedMinutes} ${amOrPm}</div>
                         </div>`;
@@ -364,7 +405,7 @@ async function displaymessage(res){
                     }
                     else{
                         messages+=`<div class="message-container">
-                        <div class="sender-name text-success">other</div>
+                        <div class="sender-name text-success">${msgs.sent_by}</div>
                         <div class="message-text">${msgs.message}</div>
                         <div class="timestamp text-primary">${formattedHours}:${formattedMinutes} ${amOrPm}</div>
                         </div>`;
@@ -417,7 +458,6 @@ async function displayinviteusers(e){
                     `;
                 }
                 $('#chatpopup').modal('hide');
-                
             $('#modal').modal('show');
     }catch(err){
         const msg=document.getElementById('msg');
@@ -440,8 +480,8 @@ async function creategroup(e){
             groupname:document.getElementById('groupname').value
         }
         const res=await axios.post(`http://localhost:3000/group/create/${decodeToken.id}`,data,{headers:{"Authorization":token}});
-        localStorage.setItem('groups',JSON.stringify(res.data.groups))
-        console.log(res.data)
+        localStorage.setItem('groups',JSON.stringify(res.data.groups));
+        console.log(res.data);
         if(res.status===200){
             localStorage.setItem('group',JSON.stringify(res.data.groupCreated));
             await $('#modal').modal('hide');
@@ -449,7 +489,7 @@ async function creategroup(e){
                 alert(`${res.data.groupCreated.Name} Group Created successfully`);
             }, 100);
         const groups=document.getElementById('groups');
-        groups.innerHTML+=`<a  id="${res.data.groupCreated.id}" onclick="getGroupMessages('${res.data.groupCreated.id}','${res.data.groupCreated.Name}')"><button class="button border-bottom-primary">${res.data.groupCreated.Name}</button></a>`
+        groups.innerHTML+=`<a id="${res.data.groupCreated.id}" onclick="getGroupMessages('${res.data.groupCreated.id}','${res.data.groupCreated.Name}')"><button class="button border-bottom-primary">${res.data.groupCreated.Name}</button></a>`
         }
     }catch(err){
         const message=async (err)=>{

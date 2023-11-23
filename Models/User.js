@@ -26,6 +26,11 @@ const User = sequelize.define("user", {
         type: Sequelize.STRING,
         allowNull: false
     },
+    lastonline: {
+        type: Sequelize.STRING,
+        defaultValue:'online now'
+    }
+
 });
 
 module.exports = User

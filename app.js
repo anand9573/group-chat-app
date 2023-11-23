@@ -3,7 +3,8 @@ const fs = require('fs');
 const express = require("express")
 const bodParser = require("body-parser")
 const cors = require("cors")
-const AuthenticationRoutes = require("./Routes/AuthRoutes")
+const AuthenticationRoutes = require("./Routes/AuthRoutes");
+const sequelize=require('./Util/Database')
 const MessagesRouter = require("./routes/Messages")
 const GroupRouter = require("./routes/Group")
 const PasswordRouter=require('./Routes/password')
@@ -12,77 +13,137 @@ const app = express()
 const forgotpassword=require('./Models/forgotpassword');
 const User = require("./Models/User")
 const Messages = require("./Models/Messages")
-const Group_Members = require("./Models/GroupMember")
+const Group_Members = require("./Models/GroupMember");
+const AchivedChat=require('./Models/archivedchats');
 const Group = require("./Models/Group")
 const path = require('path');
 const http = require('http');
 const socketIO = require('socket.io');
+const cron = require('node-cron');
 
 const port = process.env.PORT || 8080;
 
 const server = http.createServer(app);
 const io = socketIO(server); 
+const Op  = require('sequelize');
 
-// const connectedUsers = new Map(); 
 io.on('connection', (socket) => {
-  socket.on('custom-event',(number,string,object)=>{
-    console.log('socket display is',number,string,object)
+  socket.on('setUserId', (userId) => {
+    console.log(`User with ID ${userId} connected`);
+    // Store the user ID in a data structure or associate it with the socket
+    socket.userId = userId;
+  });
+  socket.on('token',async(token)=>{
+    const user = await User.findByPk(token.id)
+    if(user){
+      socket.emit('verified',true)
+      await User.update(
+        { lastonline: 'online now' },
+        {
+          where: {
+            id:token.id
+          }
+        }
+        )
+    }else{
+      socket.emit('verified',false)
+    }
   })
+  socket.on('lastonline',async(userid)=>{
+    const user=await User.findByPk(userid);
+    if(user){
+      socket.emit('onlineat',userid,user.lastonline)
+  }
+
+  });
   socket.on('send-message',(data)=>{
     console.log('socket display is',data)
    socket.broadcast.emit('receive-message',data)
 
-  })
+  });
+
+  cron.schedule('* 20 1 * * *', async () => {
+    console.log('code is running in cron')
+    const currentTimestamp = new Date();
+    currentTimestamp.setHours(currentTimestamp.getHours() - 24);
+    const chat = await Messages.findAll({ where: { time_stamp: { [Op.lt]: currentTimestamp } } })
+
+    chat.forEach(async chat => {
+        await AchivedChat.create({ sent_to:chat.sent_to, message:chat.message, file:chat.file, url:chat.url, time_stamp:chat.time_stamp,createdAt:chat.createdAt, updatedAt:chat.updatedAt, userId:chat.userId, groupId:chat.groupId,sentby:chat.sent_by })
+
+    await Messages.destroy({ where: { createdAt: { [Op.lt]: currentTimestamp } } })
+});
+});
+
+
   function removeSpacesFromFileName(filename) {
-    // Replace spaces with underscores
     return filename.replace(/ /g, '_');
   }
 
   socket.on('file-upload', (fileData,data) => {
     try {      
-      console.log('------------------------------------------------------------------------>file uploading')
+      console.log('----->file uploading')
       const filename =removeSpacesFromFileName(`${fileData.filename}`);
       const fileContent = fileData.content;
       
       // Save the received file to the server
       fs.writeFileSync(`./public/views/uploads/${filename}`, fileContent);
-      
-      console.log('------------------------------------------------------------------------------------------------------------------------------------------------------------------File saved successfully');
+      console.log('-----File saved successfully');
       socket.broadcast.emit('file-received', filename, `http://localhost:3000/uploads/${filename}`, new Date(),data);
     } catch (err) {
-      console.error('Error------------------------------------------------------------------------------------------------------------------------:', err);
+      console.error('Error-----:', err);
     }
   });
-// })
+  const connectedUsers=[]
+  socket.on('login',async (userId) => {
+    socket.broadcast.emit('userOnline', userId);
+    connectedUsers[userId]='Online Now';
+    socket.emit('onlineUsers', connectedUsers);
+  });
+  socket.on('disconnect', async() => {
+          console.log('disconnected',socket.userId);
+              const currentDate = new Date();
+              const hours = currentDate.getHours();
+              const minutes = currentDate.getMinutes();
+              const amOrPm = hours >= 12 ? 'pm' : 'am';
+              const lastonline = `${hours % 12}:${minutes} ${amOrPm}`;
+              try{
+                
+                const user=await User.update(
+                  { lastonline: lastonline },
+                  {
+                    where: {
+                      id:socket.userId
+                    }
+                  })
+                  
+                }catch(err){
+                  console.log(err)
 
-    // socket.on('login',async (userId) => {
-    //     socket.broadcast.emit('userOnline', userId);
-    //     connectedUsers[userId]='User Online Now';
-    //     socket.emit('onlineUsers', connectedUsers);
-    //     const userexist = await User.findByPk(userId);
-    //     socket.emit('userexist', userexist);
-    //   });
-  })
-      // socket.on('disconnect', () => {
-      //   console.log('dissconnected')
-        // for (const [userId, socketId] of connectedUsers) {
-          // if (socketId === socket.id) {
-          //   connectedUsers.delete(userId); // Remove the user from the map
-          //   const currentDate = new Date();
-          //   const hours = currentDate.getHours();
-          //   const amOrPm = hours >= 12 ? 'PM' : 'AM';
-          //   const lastonline = `last seen at ${hours % 12} ${amOrPm}`;
-          //   socket.broadcast.emit('userOffline', userId, lastonline); // Notify other clients
-// });
-      
-app.use(express.static('public'));
-
+                }
+                // socket.emit('userOffline',userId, lastonline);
+                
+              })
+              
+              //       }
+              //     }catch(err){
+        //       if(t){
+          //         await t.rollback()
+          //       }
+          //       console.log(err)
+          //     }
+          //   });
+          
+          // })
+        })
+          app.use(express.static('public'));
+          
 const corsOptions = {
     origin:['http://127.0.0.1:5500','http://localhost:3000'],
     methods:['GET','POST','DELETE','PUT'],
     credentials:true
-}
-
+  }
+  
 app.use(cors(corsOptions))
 app.use(bodParser.json())
 

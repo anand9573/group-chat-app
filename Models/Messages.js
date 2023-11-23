@@ -9,6 +9,9 @@ const Messages = sequelize.define("messages", {
         defaultValue: Sequelize.UUIDV4,
         primaryKey: true
     },
+    sent_by:{
+        type: Sequelize.CHAR,
+    },
     sent_to: {
         type: Sequelize.CHAR,
     },
