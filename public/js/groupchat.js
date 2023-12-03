@@ -54,7 +54,7 @@ socket.on('receive-message',(data)=>{
     }else{
         console.log('its not')
     }
-    })
+})
 
 
     

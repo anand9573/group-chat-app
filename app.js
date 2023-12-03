@@ -26,6 +26,7 @@ const port = process.env.PORT || 8080;
 const server = http.createServer(app);
 const io = socketIO(server); 
 const Op  = require('sequelize');
+const { group } = require("console");
 
 io.on('connection', (socket) => {
   socket.on('setUserId', (userId) => {
@@ -59,6 +60,11 @@ io.on('connection', (socket) => {
   socket.on('send-message',(data)=>{
     console.log('socket display is',data)
    socket.broadcast.emit('receive-message',data)
+
+  });
+  socket.on('group-created',(groupname)=>{
+   socket.emit('receive-groupname',groupname);
+   socket.broadcast.emit('receive-groupmsg',groupname);
 
   });
 
@@ -106,7 +112,9 @@ io.on('connection', (socket) => {
               const hours = currentDate.getHours();
               const minutes = currentDate.getMinutes();
               const amOrPm = hours >= 12 ? 'pm' : 'am';
-              const lastonline = `${hours % 12}:${minutes} ${amOrPm}`;
+              const formattedMinutes = String(minutes).padStart(2, '0');
+              const formattedHours = (hours % 12 === 0) ? 12 : hours % 12;
+              const lastonline = `${formattedHours}:${formattedMinutes} ${amOrPm}`;
               try{
                 
                 const user=await User.update(
